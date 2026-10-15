@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#111827">
-<title>🐢 Turtle Trading Journal</title>
+<title>🐢 金・原油タートル ジャーナル</title>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><span class="turtle">🐢</span><div><strong>Turtle Trading Journal</strong><small>けんた専用トレード管理</small></div></div>
+  <div class="brand"><span class="turtle">🐢</span><div><strong>金・原油タートル ジャーナル</strong><small>GMOクリック証券 CFD ・ けんた専用</small></div></div>
   <nav>
     <button data-page="dashboard" class="nav active">ダッシュボード</button>
     <button data-page="new" class="nav">新規記録</button>
@@ -24,15 +24,16 @@
 <section id="dashboard" class="page active">
   <div class="page-head"><div><h1>ダッシュボード</h1><p id="monthLabel"></p></div><button class="primary" data-page="new">＋ トレードを記録</button></div>
   <div class="cards">
-    <article class="card hero"><span>資産</span><b id="asset">$60.00</b><small>開始資産からの累計損益</small></article>
-    <article class="card"><span>今月損益</span><b id="monthlyPnl">$0.00</b></article>
+    <article class="card hero"><span>資産</span><b id="asset">¥0</b><small>開始資産からの累計損益</small></article>
+    <article class="card"><span>今月損益</span><b id="monthlyPnl">¥0</b></article>
     <article class="card"><span>月間損益率</span><b id="monthlyRate">0.00%</b></article>
     <article class="card"><span>トレード数</span><b id="tradeCount">0</b></article>
     <article class="card"><span>勝率</span><b id="winRate">0.0%</b></article>
     <article class="card"><span>平均RR</span><b id="avgRR">—</b></article>
+    <article class="card"><span>ルール通り率</span><b id="ruleRate">—</b><small id="ruleRateAll"></small></article>
   </div>
   <div class="grid2">
-    <article class="panel"><h2>銘柄別損益</h2><div id="symbolStats" class="stats"></div></article>
+    <article class="panel"><h2>銘柄別損益（累計）</h2><div id="symbolStats" class="stats"></div></article>
     <article class="panel"><h2>最近のトレード</h2><div id="recentTrades"></div></article>
   </div>
 </section>
@@ -44,26 +45,32 @@
     <h2>エントリー時に入力</h2>
     <div class="formgrid">
       <label>日付<input type="date" id="date" required></label>
-      <label>銘柄<input type="text" id="symbol" placeholder="BTC / ETH / SOL / XRP" required></label>
+      <label>銘柄<select id="instrument" required></select><small id="instrumentInfo" class="field-note"></small></label>
       <label>Long / Short<select id="side"><option>Long</option><option>Short</option></select></label>
-      <label>エントリー価格<input type="number" id="entry" step="any" min="0" required></label>
-      <label>損切り価格（SL）<input type="number" id="sl" step="any" min="0" required></label>
+      <label>ユニット番号<select id="unitNo"><option value="1">1（新規）</option><option value="2">2（増し玉）</option><option value="3">3（増し玉）</option><option value="4">4（増し玉）</option></select></label>
+      <label>エントリー価格<span class="unit" data-unit></span><input type="number" id="entry" step="any" min="0" required></label>
+      <label>損切り価格（SL）<span class="unit" data-unit></span><input type="number" id="sl" step="any" min="0" required><small id="slHint" class="field-note"></small></label>
+      <label>枚数<input type="number" id="lots" step="0.1" min="0.1" required></label>
+      <label>N（20日ATR）<span class="unit" data-unit></span><input type="number" id="n" step="any" min="0" required></label>
     </div>
-    <label>エントリー理由<textarea id="entryReason" required placeholder="なぜこのトレードに入るのか"></textarea></label>
-    <label>どうなったら出るのか<textarea id="exitPlan" required placeholder="価格・チャート条件・無効化条件など"></textarea></label>
+    <label>エントリー理由<textarea id="entryReason" required placeholder="例：55日高値ブレイク（逆指値で約定）"></textarea></label>
+    <label>どうなったら出るのか<textarea id="exitPlan" required placeholder="例：2N損切り ○○ ／ 20日安値 ○○ のどちらか近いほう"></textarea></label>
     <label>エントリー時の画像<input type="file" id="image" accept="image/*"></label>
     <div id="imagePreview" class="image-preview hidden"></div>
 
     <div class="settlement-box">
       <h2>決済後に入力</h2>
       <div class="formgrid">
-        <label>決済価格<input type="number" id="exit" step="any" min="0"></label>
-        <label>損益（USD）<input type="number" id="pnl" step="any"></label>
+        <label>決済価格<span class="unit" data-unit></span><input type="number" id="exit" step="any" min="0"></label>
+        <label>損益（円）<input type="number" id="pnl" step="any" placeholder="GMOクリックの決済結果"></label>
         <label>損益率（%）<input type="number" id="pnlRate" step="any"></label>
-        <label>保有時間<input type="text" id="holdTime" placeholder="例：8時間、2日4時間"></label>
+        <label>保有時間<input type="text" id="holdTime" placeholder="例：3日、2週間"></label>
+        <label>決済理由<select id="exitReason"><option value="">（未選択）</option><option>2N損切り</option><option>20日ブレイク</option><option>その他</option></select></label>
+        <label>ルール通りか<select id="ruleFollowed"><option value="">（未選択）</option><option value="yes">はい</option><option value="no">いいえ</option></select></label>
       </div>
+      <label id="ruleNoteWrap" class="hidden">ルール通りでなかった理由<textarea id="ruleNote" placeholder="例：損切りの逆指値を入れ忘れた、シグナル前に入った"></textarea></label>
       <label>感情<textarea id="emotion" placeholder="決済後の感情を自由に記入"></textarea></label>
-      <p class="hint">RRは「エントリー価格・SL・決済価格」から自動計算します。Long/Shortに応じて、リスク幅に対する実現RRを算出します。</p>
+      <p class="hint">RRは「エントリー価格・SL・決済価格」から自動計算します。損益は換算せず、GMOクリックの決済結果（円）をそのまま入力してください。</p>
     </div>
     <div class="actions"><button type="button" class="secondary" data-page="dashboard">キャンセル</button><button class="primary" type="submit">保存する</button></div>
   </form>
@@ -75,18 +82,45 @@
 </section>
 
 <section id="months" class="page">
-  <div class="page-head"><div><h1>月別履歴</h1><p>月を選択すると、その月の損益・勝率・RRを確認できます。</p></div></div>
+  <div class="page-head"><div><h1>月別履歴</h1><p>月ごとの損益・勝率・RR・ルール通り率です。</p></div></div>
   <div id="monthList" class="month-list"></div>
 </section>
 
 <section id="settings" class="page">
-  <div class="page-head"><div><h1>設定</h1><p>資産計算の基準を設定します。</p></div></div>
+  <div class="page-head"><div><h1>設定</h1><p>開始資産・銘柄・データのバックアップを管理します。</p></div></div>
   <form id="settingsForm" class="panel form compact">
-    <label>開始資産（USD）<input type="number" id="startAsset" min="0" step="any" value="60"></label>
+    <label>開始資産（円）<input type="number" id="startAsset" min="0" step="any" value="80000"></label>
     <button class="primary" type="submit">設定を保存</button>
     <p class="hint">現在の資産 = 開始資産 ＋ 保存した全トレードの損益。</p>
   </form>
-  <div class="panel danger"><h2>データ管理</h2><p>ブラウザのローカルストレージに保存されています。端末・ブラウザを変えると自動同期されません。</p><button id="clearData" class="dangerbtn">全データを削除</button></div>
+
+  <div class="panel spaced">
+    <h2>銘柄</h2>
+    <div id="instrumentList"></div>
+    <form id="instrumentForm" class="form instrument-form">
+      <input type="hidden" id="instId">
+      <h3 id="instFormTitle">銘柄を追加</h3>
+      <div class="formgrid four">
+        <label>銘柄名<input type="text" id="instName" required placeholder="例：銀"></label>
+        <label>価格の単位<select id="instUnit"><option>円</option><option>ドル</option></select></label>
+        <label>1枚の内容<input type="text" id="instContract" placeholder="例：1.1g、10バレル"></label>
+        <label>最小枚数<input type="number" id="instMinLot" step="any" min="0" value="0.1" required></label>
+      </div>
+      <div class="actions left"><button class="primary" type="submit" id="instSubmit">追加する</button><button type="button" class="secondary hidden" id="instCancel">編集をやめる</button></div>
+    </form>
+  </div>
+
+  <div class="panel spaced">
+    <h2>バックアップ（CSV）</h2>
+    <p>トレード・銘柄・開始資産を1つのCSVファイルに保存します。読み込むと、今のデータはCSVの内容に置き換わります。</p>
+    <div class="actions left">
+      <button type="button" class="primary" id="exportCsv">CSVを書き出す</button>
+      <label class="secondary filebtn">CSVを読み込む<input type="file" id="importCsv" accept=".csv,text/csv"></label>
+    </div>
+    <div id="legacyBox" class="legacy hidden"></div>
+  </div>
+
+  <div class="panel danger"><h2>データ管理</h2><p>ブラウザのローカルストレージに保存されています。端末・ブラウザを変えると自動同期されません。定期的にCSVで書き出してください。</p><button id="clearData" class="dangerbtn">全データを削除</button></div>
 </section>
 </main>
 <div id="toast" class="toast"></div>
