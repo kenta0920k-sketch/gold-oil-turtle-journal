@@ -25,3 +25,4 @@
 @media(max-width:560px){.formgrid.four{grid-template-columns:1fr}}
 .new-inst{background:#f8fafc;border:1px dashed #d0d5dd;border-radius:12px;padding:14px 16px 2px;margin:4px 0 16px}
 .new-inst h3{font-size:13px;margin:0 0 10px;color:#344054}
+.linkbtn{display:inline-block;text-decoration:none;border-radius:9px;padding:11px 16px;font-weight:700}

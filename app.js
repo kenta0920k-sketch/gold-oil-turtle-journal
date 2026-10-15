@@ -1,7 +1,6 @@
 // 金・原油タートル ジャーナル（GMOクリック証券 CFD）
-// 旧版（ドル建て・暗号資産）のデータは LEGACY_KEY に残したまま、別のキーで保存する。
+// 暗号資産版（turtle-trading-journal、キー kentaTurtleJournal_v1）とは別のキーに保存する。同じドメインなので、キーを分けてデータを混ぜない。
 const KEY = "kentaTurtleJournal_jpy_v2", SET = "kentaTurtleSettings_jpy_v2";
-const LEGACY_KEY = "kentaTurtleJournal_v1";
 const DEFAULT_INSTRUMENTS = [
   { id: "gold-jpy", name: "金/JPY", unit: "円", contract: "1.1g", minLot: 0.1 },
   { id: "wti", name: "WTI原油", unit: "ドル", contract: "10バレル", minLot: 0.1 },
@@ -253,7 +252,6 @@ function renderSettings() {
     const n = trades.filter(t => t.instrumentId === i.id).length;
     return `<tr><td><b>${esc(i.name)}</b></td><td>${esc(i.unit)}</td><td>${esc(i.contract || "—")}</td><td>${esc(i.minLot)}枚</td><td>${n}件</td><td class="btns"><button class="mini secondary" data-inst-edit="${esc(i.id)}">編集</button><button class="mini dangerbtn" data-inst-del="${esc(i.id)}">削除</button></td></tr>`;
   }).join("")}</tbody></table></div>` : `<div class="empty">銘柄がありません。下のフォームから追加してください。</div>`;
-  renderLegacy();
 }
 $("settingsForm").addEventListener("submit", e => { e.preventDefault(); settings.startAsset = Number($("startAsset").value) || 0; if (save()) toast("設定を保存しました"); renderDashboard(); });
 
@@ -347,19 +345,6 @@ $("importCsv").addEventListener("change", async e => {
     toast("CSVを読み込みました"); renderSettings(); renderDashboard(); fillInstrumentSelect();
   } catch { toast("CSVを読み込めませんでした"); }
 });
-
-// 旧版（ドル建て・暗号資産）のデータが残っていれば知らせる。消さずに残し、CSVで取り出せるようにする
-function renderLegacy() {
-  const legacy = load(LEGACY_KEY, []);
-  const box = $("legacyBox");
-  if (!Array.isArray(legacy) || !legacy.length) { box.classList.add("hidden"); return; }
-  box.classList.remove("hidden");
-  box.innerHTML = `<p>旧ジャーナル（ドル建て・暗号資産）の記録が <b>${legacy.length}件</b> このブラウザに残っています。この画面には表示しませんが、消してはいません。</p><button type="button" class="secondary" id="exportLegacy">旧データをCSVで書き出す</button>`;
-  $("exportLegacy").addEventListener("click", () => {
-    const cols = [...new Set(legacy.flatMap(t => Object.keys(t)))];
-    download(`turtle-journal-old-usd-${today()}.csv`, toCSV(cols, legacy));
-  });
-}
 
 $("clearData").addEventListener("click", () => {
   if (!confirm("全トレードと設定（銘柄リストを含む）を削除します。本当に実行しますか？")) return;

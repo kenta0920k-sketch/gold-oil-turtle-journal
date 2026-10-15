@@ -2,7 +2,9 @@
 
 GMOクリック証券（CFD）で、タートル手法（S2：55日ブレイク／20日ブレイク）の金・原油を手動で取引するための記録・ダッシュボード。けんた専用。
 
-公開URL：https://kenta0920k-sketch.github.io/turtle-trading-journal/
+公開URL：https://kenta0920k-sketch.github.io/gold-oil-turtle-journal/
+
+暗号資産のトレードは別のジャーナル（https://kenta0920k-sketch.github.io/turtle-trading-journal/ ）で記録する。2026-10-15 に分けた。
 
 ## 主な機能
 - 通貨は円。開始資産 80,000円（設定で変更できる）
@@ -20,7 +22,7 @@ GMOクリック証券（CFD）で、タートル手法（S2：55日ブレイク�
 - ブラウザの localStorage に保存する。別の端末・ブラウザとは同期されないので、定期的にCSVで書き出す
 - 銘柄を削除しても、その銘柄のトレード記録は残る（「（削除済み）」と表示される）
 - 画像は保存容量を抑えるため、幅1200pxのJPEGに縮小して保存する
-- 旧版（ドル建て・暗号資産、2026-09 作成）の記録は消さずにブラウザに残してある。設定画面の「旧データをCSVで書き出す」で取り出せる
+- 暗号資産版とは同じドメインなので、保存先のキーを分けている（金・原油版：kentaTurtleJournal_jpy_v2／暗号資産版：kentaTurtleJournal_v1）
 
 ## GitHub Pagesで公開
 `index.html`, `style.css`, `app.js`, `manifest.json` を main ブランチのルートに置く（Settings → Pages → Deploy from a branch → main / root）。
