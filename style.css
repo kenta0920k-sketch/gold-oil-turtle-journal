@@ -23,3 +23,5 @@
 .history-img{display:block;margin-top:10px;max-width:100%;max-height:240px;border-radius:8px;border:1px solid #e5e7eb}
 @media(max-width:900px){.formgrid.four{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.formgrid.four{grid-template-columns:1fr}}
+.new-inst{background:#f8fafc;border:1px dashed #d0d5dd;border-radius:12px;padding:14px 16px 2px;margin:4px 0 16px}
+.new-inst h3{font-size:13px;margin:0 0 10px;color:#344054}

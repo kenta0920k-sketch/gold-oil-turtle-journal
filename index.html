@@ -53,6 +53,15 @@
       <label>枚数<input type="number" id="lots" step="0.1" min="0.1" required></label>
       <label>N（20日ATR）<span class="unit" data-unit></span><input type="number" id="n" step="any" min="0" required></label>
     </div>
+    <div id="newInstBox" class="new-inst hidden">
+      <h3>新しい銘柄（保存すると銘柄リストにも追加されます）</h3>
+      <div class="formgrid four">
+        <label>銘柄名<input type="text" id="newInstName" placeholder="例：銀"></label>
+        <label>価格の単位<select id="newInstUnit"><option>円</option><option>ドル</option></select></label>
+        <label>1枚の内容<input type="text" id="newInstContract" placeholder="例：50オンス"></label>
+        <label>最小枚数<input type="number" id="newInstMinLot" step="any" min="0" value="0.1"></label>
+      </div>
+    </div>
     <label>エントリー理由<textarea id="entryReason" required placeholder="例：55日高値ブレイク（逆指値で約定）"></textarea></label>
     <label>どうなったら出るのか<textarea id="exitPlan" required placeholder="例：2N損切り ○○ ／ 20日安値 ○○ のどちらか近いほう"></textarea></label>
     <label>エントリー時の画像<input type="file" id="image" accept="image/*"></label>

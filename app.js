@@ -113,19 +113,25 @@ document.addEventListener("click", e => { const r = e.target.closest("[data-edit
 function fillInstrumentSelect(selectedId, fallbackName) {
   const opts = settings.instruments.map(i => `<option value="${esc(i.id)}">${esc(i.name)}</option>`);
   if (selectedId && !inst(selectedId)) opts.push(`<option value="${esc(selectedId)}">${esc(fallbackName || "不明")}（削除済み）</option>`);
-  $("instrument").innerHTML = opts.join("") || `<option value="">（設定で銘柄を追加してください）</option>`;
+  opts.push(`<option value="${NEW_INST}">＋ 新しい銘柄を追加…</option>`);
+  $("instrument").innerHTML = opts.join("");
   if (selectedId) $("instrument").value = selectedId;
   onInstrumentChange();
 }
+const NEW_INST = "__new__";
 function onInstrumentChange() {
-  const i = inst($("instrument").value);
-  const unit = i?.unit ?? "";
+  const isNew = $("instrument").value === NEW_INST;
+  $("newInstBox").classList.toggle("hidden", !isNew);
+  const i = isNew ? null : inst($("instrument").value);
+  const unit = isNew ? $("newInstUnit").value : i?.unit ?? "";
   document.querySelectorAll("[data-unit]").forEach(s => s.textContent = unit ? `（${unit}）` : "");
-  $("instrumentInfo").textContent = i ? `1枚＝${i.contract || "—"}／最小 ${i.minLot}枚` : "";
-  const step = i?.minLot || 0.1;
+  $("instrumentInfo").textContent = i ? `1枚＝${i.contract || "—"}／最小 ${i.minLot}枚` : isNew ? "下で銘柄の内容を入力" : "";
+  const step = (isNew ? Number($("newInstMinLot").value) : i?.minLot) || 0.1;
   $("lots").step = step; $("lots").min = step;
   updateSlHint();
 }
+["newInstUnit", "newInstMinLot"].forEach(id => $(id).addEventListener("input", onInstrumentChange));
+$("newInstUnit").addEventListener("change", onInstrumentChange);
 function updateSlHint() {
   const e = Number($("entry").value), n = Number($("n").value);
   if (!e || !n) { $("slHint").textContent = ""; return; }
@@ -166,9 +172,17 @@ $("tradeForm").addEventListener("submit", e => {
   if ($("ruleFollowed").value === "no" && !$("ruleNote").value.trim()) { toast("ルール通りでなかった理由を入力してください"); $("ruleNote").focus(); return; }
   const id = $("tradeId").value || crypto.randomUUID();
   const old = trades.find(t => t.id === id);
-  const i = inst($("instrument").value);
+  const instBackup = clone(settings.instruments);
+  let i = inst($("instrument").value);
+  if ($("instrument").value === NEW_INST) { // 記録画面から新しい銘柄を追加する
+    const name = $("newInstName").value.trim();
+    if (!name) { toast("新しい銘柄の銘柄名を入力してください"); $("newInstName").focus(); return; }
+    if (settings.instruments.some(x => x.name === name)) { toast(`「${name}」はすでにあります。リストから選んでください`); return; }
+    i = { id: crypto.randomUUID(), name, unit: $("newInstUnit").value, contract: $("newInstContract").value.trim(), minLot: Number($("newInstMinLot").value) || 0.1 };
+    settings.instruments.push(i);
+  }
   const t = {
-    id, date: $("date").value, instrumentId: $("instrument").value,
+    id, date: $("date").value, instrumentId: i?.id ?? $("instrument").value,
     symbol: i?.name ?? old?.symbol ?? "", unit: i?.unit ?? old?.unit ?? "",
     side: $("side").value, unitNo: $("unitNo").value, entry: $("entry").value, sl: $("sl").value,
     lots: $("lots").value, n: $("n").value,
@@ -180,7 +194,7 @@ $("tradeForm").addEventListener("submit", e => {
   };
   const backup = trades.slice();
   const idx = trades.findIndex(x => x.id === id); if (idx >= 0) trades[idx] = t; else trades.push(t);
-  if (!save()) { trades = backup; return; }
+  if (!save()) { trades = backup; settings.instruments = instBackup; return; }
   toast("トレードを保存しました"); resetForm(); go("dashboard");
 });
 function resetForm() {
